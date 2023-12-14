@@ -46,7 +46,7 @@ def calibration(input: str) -> int:
 
 def main():
     total = 0
-    with open('./day1/day1.input.txt', 'r') as input_file:
+    with open('./day1/day1_input.txt', 'r') as input_file:
         for line in input_file:
             total += calibration(line.strip())
 

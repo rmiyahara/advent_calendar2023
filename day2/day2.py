@@ -71,7 +71,7 @@ def game_power(input: str) -> int:
 def main():
     total = 0
     # num_cubes = { 'red': 12, 'green': 13, 'blue': 14 }
-    with open('./day2/day2.input.txt', 'r') as input_file:
+    with open('./day2/day2_input.txt', 'r') as input_file:
         for line in input_file:
             # if (is_game_possible(line.strip(), num_cubes)):
             #     total += game_id(line.strip())
