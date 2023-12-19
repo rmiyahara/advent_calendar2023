@@ -6,17 +6,42 @@ debug = False
 # Class used to hold the entire input. Can loop through games to get point totals
 class GameSet:
     def __init__(self, input: list[str]):
-        self.num_games = len(input)
-        self.games: list[Game] = []
+        self.num_games = len(input) + 1
+        self.games: dict[int, Game] = {}
         for line in input:
-            self.games.append(Game(line))
+            game_for_line = Game(line)
+            self.games[game_for_line.card_num] = game_for_line
     
     def get_point_total(self) -> int:
         total = 0
-        for game in self.games:
+        for key in self.games:
             if (debug):
-                print("[DEBUG] Game: %s has %s points" % (game.card_num, game.get_points()))
-            total += game.get_points()
+                print("[DEBUG] Game: %s has %s points" % (self.games[key].card_num, self.games[key].get_points()))
+            total += self.games[key].get_points()
+        return total
+    
+    def get_total_scratch_cards(self) -> int:
+        copies: dict[int, int] = {}
+        # Account for the current card
+        for key in self.games:
+            copies[key] = 1
+
+        for i in range(1, self.num_games):
+            if (debug):
+                print("[DEBUG] Processing card: %d with %d matching numbers" % (i, self.games[i].matching_num_count))
+            # Add copies
+            if (self.games[i].matching_num_count > 0):
+                for j in range(1, self.games[i].matching_num_count + 1):
+                    # Make sure the card we're copying exists
+                    if (self.games[i + j]):
+                        copies[i + j] += copies[i]
+
+        if (debug):
+            for key in copies:
+                print("[DEBUG] Card: %s has %s copies" % (key, copies[key]))
+        total = 0
+        for key in copies:
+            total += copies[key]
         return total
 
 # Class used to parse each line of a game
@@ -25,11 +50,12 @@ class Game:
         self.card_num = self.parse_card_num(input)
         self.winning_nums = self.parse_winning_nums(input)
         self.nums_owned = self.parse_nums_owned(input)
+        self.matching_num_count = self.get_matching_num_count()
 
     def parse_card_num(self, input_line: str) -> int:
         # In format of 'Card X'
         card = input_line.split(': ')[0]
-        return card.split(' ')[-1].strip()
+        return int(card.split(' ')[-1].strip())
     
     # Takes in a string containing numbers and converts them to an int list
     def numbers_in_string_to_int_list(self, nums_as_str: str) -> list[int]:
@@ -69,19 +95,21 @@ class Game:
         if (debug):
             print('[DEBUG] Nums parsed: ' + str(nums_list))
         return nums_list
-
-    # Returns the points a card is worth based on the amount of matching numbers
-    def get_points(self) -> int:
+    
+    # Returns the number of matching numbers in a game
+    def get_matching_num_count(self):
         matching_num_count = 0
         for nums in self.nums_owned:
             if (nums in self.winning_nums):
                 matching_num_count += 1
-        if (debug):
-            print("[DEBUG] Game: %s has %s matching numbers" % (self.card_num, matching_num_count))
-        
-        if (matching_num_count < 1):
+
+        return matching_num_count
+
+    # Returns the points a card is worth based on the amount of matching numbers
+    def get_points(self) -> int:
+        if (self.matching_num_count < 1):
             return 0
-        return 2 ** (matching_num_count - 1)
+        return 2 ** (self.matching_num_count - 1)
 
 
 def main():
@@ -106,7 +134,8 @@ def main():
         # Set input_grid's values
         for line in input_file:
             input.append(line.strip())
-        print("Game total is: " + str(GameSet(input).get_point_total()))
+        # print("Game total is: " + str(GameSet(input).get_point_total()))
+        print("Scratch Card total is: " + str(GameSet(input).get_total_scratch_cards()))
 
     return 0
 
