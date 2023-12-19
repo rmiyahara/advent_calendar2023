@@ -115,8 +115,8 @@ class Game:
 def main():
     # Command line argument parsing
     parser = argparse.ArgumentParser(description='A script to run day 4 of the advent calendar.')
-    parser.add_argument('--test', type = bool, default = False, help = 'Run the program with the test data')
-    parser.add_argument('--debug', type = bool, default = False, help='Runs code with logging statements for debugging')
+    parser.add_argument('--test', action = 'store_true', help = 'Run the program with the test data')
+    parser.add_argument('--debug', action = 'store_true',  help='Runs code with logging statements for debugging')
     args = parser.parse_args()
 
     global debug
